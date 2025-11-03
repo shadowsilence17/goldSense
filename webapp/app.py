@@ -105,45 +105,64 @@ def fetch_latest_features():
         # Fetch data with error handling
         def safe_download(ticker, name):
             try:
-                data = yf.download(ticker, start=start_date, end=end_date, progress=False, auto_adjust=False)
+                # Use auto_adjust=True for more accurate prices
+                data = yf.download(ticker, start=start_date, end=end_date, progress=False, auto_adjust=True)
                 if len(data) > 0:
-                    print(f"✅ {name}: {len(data)} days")
+                    last_price = float(data['Close'].iloc[-1])
+                    print(f"✅ {name}: {len(data)} days, Last: ${last_price:.2f}")
                     return data
                 else:
                     print(f"⚠️  {name}: No data")
                     return None
             except Exception as e:
-                print(f"❌ {name}: {str(e)}")
+                print(f"❌ {name}: {str(e)[:50]}")
                 return None
         
-        # Fetch all data sources
-        gold = safe_download('GC=F', 'Gold')
+        # Fetch gold data - Use GLD ETF which is more reliable for current price
+        # GLD typically trades at about 1/7.17 of gold spot price per troy ounce
+        # (As of Nov 2025: GLD ~$370 ≈ Gold ~$2,650/oz)
+        gold = None
+        gold_price_multiplier = 1.0
+        
+        gold_tickers = [
+            ('GLD', 'Gold ETF (SPDR)', 7.17),  # GLD ~$370 = ~$2,650/oz
+            ('GC=F', 'Gold Futures', 1.0),     # Direct futures price (may be different month)
+        ]
+        
+        for ticker, name, multiplier in gold_tickers:
+            test_gold = safe_download(ticker, name)
+            if test_gold is not None and len(test_gold) > 0:
+                gold = test_gold
+                gold_price_multiplier = multiplier
+                print(f"✅ Using {name} ({ticker}) for gold price (multiplier: {multiplier}x)")
+                break
+        
+        if gold is None or len(gold) == 0:
+            raise Exception("Cannot fetch gold price data from any source")
+        
+        # Fetch other markets
         silver = safe_download('SI=F', 'Silver')
         oil = safe_download('CL=F', 'Oil')
         usd = safe_download('DX-Y.NYB', 'USD Index')
         
-        if gold is None or len(gold) == 0:
-            print("❌ Failed to fetch gold data - trying alternative ticker")
-            gold = safe_download('XAUUSD=X', 'Gold (Alt)')
-        
-        if gold is None or len(gold) == 0:
-            raise Exception("Cannot fetch gold price data")
-        
-        # Get last valid values
-        def get_last_value(df, col):
-            if df is not None and len(df) > 0 and col in df.columns:
-                val = df[col].dropna().iloc[-1] if len(df[col].dropna()) > 0 else 0
-                return float(val.item() if hasattr(val, 'item') else val)
+        # Get last valid values - handle both adjusted and non-adjusted data
+        def get_last_value(df, col='Close'):
+            if df is not None and len(df) > 0:
+                # Try 'Close' first, then 'Adj Close'
+                for column in [col, 'Adj Close', 'Close']:
+                    if column in df.columns:
+                        val = df[column].dropna().iloc[-1] if len(df[column].dropna()) > 0 else 0
+                        return float(val.item() if hasattr(val, 'item') else val)
             return 0
         
         # Build features matching the model's expected input
         features = {}
         
-        # Basic OHLCV for Gold
-        features['Gold_Open'] = get_last_value(gold, 'Open')
-        features['Gold_High'] = get_last_value(gold, 'High')
-        features['Gold_Low'] = get_last_value(gold, 'Low')
-        features['Gold_Close'] = get_last_value(gold, 'Close')
+        # Basic OHLCV for Gold - apply multiplier for ETF conversion
+        features['Gold_Open'] = get_last_value(gold, 'Open') * gold_price_multiplier
+        features['Gold_High'] = get_last_value(gold, 'High') * gold_price_multiplier
+        features['Gold_Low'] = get_last_value(gold, 'Low') * gold_price_multiplier
+        features['Gold_Close'] = get_last_value(gold, 'Close') * gold_price_multiplier
         features['Gold_Volume'] = get_last_value(gold, 'Volume')
         
         # Silver data
@@ -154,10 +173,11 @@ def fetch_latest_features():
             features['Silver_Close'] = get_last_value(silver, 'Close')
             features['Silver_Volume'] = get_last_value(silver, 'Volume')
         else:
-            features['Silver_Open'] = 30.0
-            features['Silver_High'] = 31.0
-            features['Silver_Low'] = 29.5
-            features['Silver_Close'] = 30.5
+            # Default values based on typical silver prices
+            features['Silver_Open'] = 31.0
+            features['Silver_High'] = 31.5
+            features['Silver_Low'] = 30.5
+            features['Silver_Close'] = 31.0
             features['Silver_Volume'] = 100000
         
         # Gold/Silver ratios
@@ -172,19 +192,30 @@ def fetch_latest_features():
             features['G/S_Low'] = 74
             features['G/S_Close'] = 75
         
-        # Technical indicators
+        # Technical indicators - apply multiplier
         if gold is not None and len(gold) >= 30:
-            close_prices = gold['Close'].dropna()
-            features['Gold_MA7'] = float(close_prices.tail(7).mean().item())
-            features['Gold_MA14'] = float(close_prices.tail(14).mean().item())
-            features['Gold_MA30'] = float(close_prices.tail(30).mean().item())
-            features['Gold_Volatility_7'] = float(close_prices.tail(7).std().item())
-            features['Gold_Volatility_14'] = float(close_prices.tail(14).std().item())
-            features['Gold_Volatility_30'] = float(close_prices.tail(30).std().item())
+            # Get close prices - try both 'Close' and 'Adj Close'
+            if 'Close' in gold.columns:
+                close_prices = gold['Close'].dropna() * gold_price_multiplier
+            elif 'Adj Close' in gold.columns:
+                close_prices = gold['Adj Close'].dropna() * gold_price_multiplier
+            else:
+                close_prices = gold.iloc[:, 3].dropna() * gold_price_multiplier  # Usually 4th column is close
+            
+            features['Gold_MA7'] = float(close_prices.tail(7).mean())
+            features['Gold_MA14'] = float(close_prices.tail(14).mean())
+            features['Gold_MA30'] = float(close_prices.tail(30).mean())
+            features['Gold_Volatility_7'] = float(close_prices.tail(7).std())
+            features['Gold_Volatility_14'] = float(close_prices.tail(14).std())
+            features['Gold_Volatility_30'] = float(close_prices.tail(30).std())
             
             # Returns
-            features['Gold_Return_1d'] = float(((close_prices.iloc[-1] - close_prices.iloc[-2]) / close_prices.iloc[-2] * 100).item())
-            features['Gold_Return_7d'] = float(((close_prices.iloc[-1] - close_prices.iloc[-8]) / close_prices.iloc[-8] * 100).item())
+            if len(close_prices) >= 8:
+                features['Gold_Return_1d'] = float(((close_prices.iloc[-1] - close_prices.iloc[-2]) / close_prices.iloc[-2] * 100))
+                features['Gold_Return_7d'] = float(((close_prices.iloc[-1] - close_prices.iloc[-8]) / close_prices.iloc[-8] * 100))
+            else:
+                features['Gold_Return_1d'] = 0
+                features['Gold_Return_7d'] = 0
         else:
             # Default values
             features['Gold_MA7'] = features['Gold_Close']
@@ -200,13 +231,13 @@ def fetch_latest_features():
         if oil is not None and len(oil) > 0:
             features['Oil_Close'] = get_last_value(oil, 'Close')
         else:
-            features['Oil_Close'] = 80.0
+            features['Oil_Close'] = 75.0  # Typical oil price
         
         # USD Index
         if usd is not None and len(usd) > 0:
             features['DXY_Close'] = get_last_value(usd, 'Close')
         else:
-            features['DXY_Close'] = 103.0
+            features['DXY_Close'] = 105.0  # Typical DXY value
         
         # Additional ratios if needed
         if features['Oil_Close'] > 0:
