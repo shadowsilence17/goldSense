@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Model files - uncomment to exclude large models
+# *.h5
+# *.pkl
+
+# Data files - keep essential data, exclude large files
+# *.csv
+
+# Exclude specific large/unnecessary files
+*_colab*.ipynb
+*_BACKUP*.ipynb
+*_CLEAN*.ipynb
+*.png
+results/
+enhanced_correlation_heatmap.png
+enhanced_time_series_all.png
+feature_importance_enhanced.png
+lstm_training_history.png
+model comparison.png
+prediction_vs_actual.png
+
+# Documentation - exclude redundant docs
+CLEANUP_*.md
+COLAB_*.md
+CRITICAL_*.txt
+FINAL_*.txt
+FIXES_*.md
+*_SUMMARY*.txt
+*_SUMMARY*.md
+IMPROVEMENTS_*.txt
+LOCAL_*.md
+ML_PROJECT_UPGRADE*.md
+NOTEBOOK_*.md
+PRACTICAL_*.txt
+PRODUCTION_*.txt
+PROJECT_COMPLETE*.txt
+QUICK_FIX*.md
+QUICK_REFERENCE*.txt
+TIMESERIESPLIT*.md
+TIME_SERIES_*.txt
+TRAINING_*.txt
+VISUALIZATION_*.md
+WHY_*.md
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Azure
+.azure/
+
+# Temporary files
+prepare_deployment.py
+export_models.py
+train_model.py
+test_webapp.py
+run_webapp*.sh

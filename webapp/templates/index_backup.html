@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Price Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Gold Price Prediction</h1>
+            <p class="subtitle">AI-Powered Market Forecasting</p>
+        </header>
+
+        <main>
+            <!-- Current Price Card -->
+            <div class="card">
+                <h2>Current Gold Price</h2>
+                <div id="current-price" class="price-display">
+                    <span class="loading">Loading...</span>
+                </div>
+                <div id="last-updated" class="meta">Last updated: --</div>
+            </div>
+
+            <!-- Prediction Controls -->
+            <div class="card">
+                <h2>Get Prediction</h2>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="getPrediction('day')">
+                        📅 Next Day
+                    </button>
+                    <button class="btn btn-secondary" onclick="getPrediction('week')">
+                        📊 Next Week
+                    </button>
+                    <button class="btn btn-tertiary" onclick="getPrediction('month')">
+                        📈 Next Month
+                    </button>
+                </div>
+            </div>
+
+            <!-- Prediction Results -->
+            <div id="results-container" style="display: none;">
+                <!-- Next Day Results -->
+                <div id="day-results" class="card" style="display: none;">
+                    <h2>Tomorrow's Prediction</h2>
+                    <div class="prediction-box">
+                        <div class="pred-value">
+                            $<span id="next-day-price">--</span>
+                        </div>
+                        <div class="pred-change">
+                            <span id="change-amount">--</span>
+                            (<span id="change-percent">--</span>%)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Week Results -->
+                <div id="week-results" class="card" style="display: none;">
+                    <h2>Next Week Forecast</h2>
+                    <div class="range-display">
+                        <div class="range-item">
+                            <div class="range-label">Low</div>
+                            <div class="range-value">$<span id="week-min">--</span></div>
+                        </div>
+                        <div class="range-item">
+                            <div class="range-label">Average</div>
+                            <div class="range-value">$<span id="week-avg">--</span></div>
+                        </div>
+                        <div class="range-item">
+                            <div class="range-label">High</div>
+                            <div class="range-value">$<span id="week-max">--</span></div>
+                        </div>
+                    </div>
+                    <canvas id="week-chart"></canvas>
+                </div>
+
+                <!-- Month Results -->
+                <div id="month-results" class="card" style="display: none;">
+                    <h2>Next Month Outlook</h2>
+                    <div class="range-display">
+                        <div class="range-item">
+                            <div class="range-label">Low</div>
+                            <div class="range-value">$<span id="month-min">--</span></div>
+                        </div>
+                        <div class="range-item">
+                            <div class="range-label">Average</div>
+                            <div class="range-value">$<span id="month-avg">--</span></div>
+                        </div>
+                        <div class="range-item">
+                            <div class="range-label">High</div>
+                            <div class="range-value">$<span id="month-max">--</span></div>
+                        </div>
+                    </div>
+                    <canvas id="month-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="loading-overlay" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing market data...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="alert alert-error" style="display: none;">
+                <span id="error-text"></span>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by Advanced ML Models (LSTM, XGBoost, LightGBM)</p>
+            <p class="disclaimer">⚠️ For educational purposes only. Not financial advice.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
