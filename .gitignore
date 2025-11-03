@@ -42,14 +42,12 @@ lstm_training_history.png
 model comparison.png
 prediction_vs_actual.png
 
-# Documentation - exclude redundant docs
+# Documentation - exclude redundant docs but keep important ones
 CLEANUP_*.md
 COLAB_*.md
 CRITICAL_*.txt
 FINAL_*.txt
 FIXES_*.md
-*_SUMMARY*.txt
-*_SUMMARY*.md
 IMPROVEMENTS_*.txt
 LOCAL_*.md
 ML_PROJECT_UPGRADE*.md
@@ -59,11 +57,19 @@ PRODUCTION_*.txt
 PROJECT_COMPLETE*.txt
 QUICK_FIX*.md
 QUICK_REFERENCE*.txt
+QUICK_REFERENCE_OLD.txt
 TIMESERIESPLIT*.md
 TIME_SERIES_*.txt
 TRAINING_*.txt
 VISUALIZATION_*.md
 WHY_*.md
+MODEL_IMPROVEMENTS_FINAL.txt
+
+# Keep these important docs:
+# !DEPLOYMENT_SUMMARY.md
+# !QUICK_COMMANDS.md
+# !README.md
+# !DEPLOYMENT_GUIDE.md
 
 # Logs
 *.log
