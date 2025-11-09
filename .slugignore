@@ -1,0 +1,46 @@
+# Files to ignore during DigitalOcean deployment (reduces slug size)
+
+# Documentation files
+*.md
+!README.md
+
+# Jupyter notebooks (keep for reference but not needed in deployment)
+*.ipynb
+
+# Shell scripts
+*.sh
+
+# Development files
+test_webapp.py
+verify_deployment_ready.py
+setup_deployment.py
+
+# Large CSV files not needed for runtime
+*.csv
+
+# Large image files (keep only if used by webapp)
+*.png
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Mac files
+.DS_Store
+
+# Git files
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Other deployment configs
+Dockerfile
+app.yaml
+
+# Results directory
+results/
+
+# Models directory at root (webapp has its own)
+/models/

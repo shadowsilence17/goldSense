@@ -1,5 +1,0 @@
-epic,instrumentName,instrumentType,expiry,high,low,percentageChange,netChange,updateTime,updateTimeUTC,bid,offer,delayTime,streamingPricesAvailable,marketStatus,scalingFactor
-CS.D.IN_GOLD.MFI.IP,Spot Gold,CURRENCIES,-,4019.84,3921.85,-1.45,-57.92,15:32:59,07:32:59,3924.3,3924.5,0,True,TRADEABLE,1
-CS.D.CFDGOLD.BMU.IP,Spot Gold ($1),CURRENCIES,-,4019.89,3921.8,-1.46,-58.02,15:32:59,07:32:59,3924.2,3924.5,0,True,TRADEABLE,1
-MT.D.GC.FWS2.IP,Gold ($100),COMMODITIES,DEC-25,4034.3,3936.8,-2.0,-80.55,15:32:59,07:32:59,3939.4,3940.0,0,True,TRADEABLE,1
-MT.D.GC.FWM2.IP,Gold ($33.20),COMMODITIES,DEC-25,4034.3,3936.8,-2.0,-80.55,15:32:59,07:32:59,3939.4,3940.0,0,True,TRADEABLE,1

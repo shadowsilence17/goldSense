@@ -4,10 +4,15 @@ WSGI entry point for DigitalOcean deployment
 import sys
 import os
 
-# Add webapp directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'webapp'))
+# Add the project root to the path
+sys.path.insert(0, os.path.dirname(__file__))
 
-from webapp.app import app
+# Import the Flask app from webapp directory
+from webapp.app import app as application
+
+# For gunicorn
+app = application
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get('PORT', 8080))
+    application.run(host='0.0.0.0', port=port)
