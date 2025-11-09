@@ -27,6 +27,17 @@ app = Flask(__name__,
             template_folder=os.path.join(WEBAPP_DIR, 'templates'),
             static_folder=os.path.join(WEBAPP_DIR, 'static'))
 
+# Add request logging middleware
+@app.before_request
+def log_request():
+    print(f"🌐 {request.method} {request.path} from {request.remote_addr}")
+    print(f"📋 Headers: {dict(request.headers)}")
+
+@app.after_request
+def log_response(response):
+    print(f"📤 Response status: {response.status_code}")
+    return response
+
 # Model paths - use absolute path relative to this file
 def get_models_dir():
     """Get the correct models directory path"""
@@ -438,7 +449,25 @@ def predict_month_range(current_features):
 @app.route('/')
 def home():
     """Home page"""
-    return render_template('index.html')
+    try:
+        print(f"📍 Home route accessed")
+        print(f"📂 Template folder: {app.template_folder}")
+        print(f"📄 Looking for: index.html")
+        
+        # Check if template exists
+        template_path = os.path.join(app.template_folder, 'index.html')
+        print(f"📄 Full path: {template_path}")
+        print(f"✅ Exists: {os.path.exists(template_path)}")
+        
+        return render_template('index.html')
+    except Exception as e:
+        print(f"❌ Error in home route: {e}")
+        traceback.print_exc()
+        return jsonify({
+            'error': str(e),
+            'template_folder': app.template_folder,
+            'templates_exist': os.path.exists(app.template_folder)
+        }), 500
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
