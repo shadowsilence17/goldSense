@@ -222,7 +222,8 @@
             <div class="card">
                 <h2>Training Results Visualizations</h2>
                 <p style="color: #7f8c8d; margin-bottom: 20px;">
-                    These plots are generated when you run the ML_Project_CLEAN.ipynb notebook.
+                    Comprehensive visualizations from our model training experiments, showcasing performance comparisons 
+                    across different ML models (Random Forest, XGBoost, LightGBM, LSTM, GRU) and their ensemble predictions.
                 </p>
                 <div id="plots-gallery" class="plots-gallery">
                     <div class="loading"><div class="spinner"></div><p>Loading visualizations...</p></div>
@@ -406,39 +407,37 @@
                     const gallery = document.getElementById('plots-gallery');
                     
                     if (data.success && data.plots.length > 0) {
-                        // Filter out problematic visualizations
-                        const excludeFiles = ['CorrelationHeatmap.png', 'DailyClosePrice.png'];
-                        const filteredPlots = data.plots.filter(plot => !excludeFiles.includes(plot.filename));
+                        let html = `
+                            <div style="text-align: center; margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px;">
+                                <p style="color: #2e7d32; font-weight: 600; margin: 0;">
+                                    📊 ${data.count} Visualizations from Model Training Experiments
+                                </p>
+                                <p style="color: #558b2f; font-size: 0.9em; margin-top: 5px;">
+                                    Testing different model performances: RF, XGBoost, LightGBM, LSTM, GRU, and Ensemble
+                                </p>
+                            </div>
+                        `;
                         
-                        if (filteredPlots.length > 0) {
-                            let html = '';
-                            filteredPlots.forEach(plot => {
-                                // URL encode the filename to handle spaces and special characters
-                                const encodedFilename = encodeURIComponent(plot.filename);
-                                html += `
-                                    <div class="plot-item" onclick="window.open('/api/plot/${encodedFilename}', '_blank')">
-                                        <img src="/api/plot/${encodedFilename}" 
-                                             alt="${plot.name}" 
-                                             loading="lazy"
-                                             onerror="this.style.display='none'">
-                                        <div class="plot-title">${plot.name}</div>
-                                    </div>
-                                `;
-                            });
-                            gallery.innerHTML = html;
-                        } else {
-                            gallery.innerHTML = `
-                                <div class="alert alert-error">
-                                    <p><strong>No visualizations available.</strong></p>
-                                    <p>Please run the training notebook to generate visualizations.</p>
+                        data.plots.forEach(plot => {
+                            const encodedFilename = encodeURIComponent(plot.filename);
+                            const description = plot.description || plot.name;
+                            html += `
+                                <div class="plot-item" onclick="window.open('/api/plot/${encodedFilename}', '_blank')" 
+                                     title="${description}">
+                                    <img src="/api/plot/${encodedFilename}" 
+                                         alt="${plot.name}" 
+                                         loading="lazy"
+                                         onerror="this.parentElement.style.display='none'">
+                                    <div class="plot-title">${plot.name}</div>
                                 </div>
                             `;
-                        }
+                        });
+                        gallery.innerHTML = html;
                     } else {
                         gallery.innerHTML = `
                             <div class="alert alert-error">
-                                <p><strong>No visualizations found.</strong></p>
-                                <p>Please run the training notebook to generate visualizations.</p>
+                                <p><strong>No visualizations available.</strong></p>
+                                <p>${data.message || 'Please check the visual directory.'}</p>
                             </div>
                         `;
                     }

@@ -732,31 +732,61 @@ def metrics_table():
 
 @app.route('/api/available_plots')
 def available_plots():
-    """List available result plots - generate dynamically if needed"""
+    """List available visualization plots from training experiments"""
     try:
-        # Check if we have model metadata with metrics
-        if metadata and 'metrics' in metadata and metadata['metrics']:
-            # We can generate plots from metadata
-            plots = [
-                {
-                    'name': 'Model Performance Metrics',
-                    'filename': 'metrics_comparison',
-                    'dynamic': True
-                }
-            ]
-            
-            return jsonify({
-                'success': True,
-                'plots': plots,
-                'count': len(plots),
-                'message': 'Generating visualizations from model data'
-            })
-        else:
+        # Get the visual directory path
+        visual_dir = os.path.join(WEBAPP_DIR, 'visual')
+        
+        if not os.path.exists(visual_dir):
             return jsonify({
                 'success': False,
                 'plots': [],
-                'message': 'No visualization data available. Models are loaded but no training metrics found. Run the training notebooks to generate detailed visualizations.'
+                'message': 'Visualizations directory not found.'
             })
+        
+        # Define plot descriptions based on model training experiments
+        plot_descriptions = {
+            'all_models_predictions.png': 'All Models Predictions Comparison - Shows predictions from all trained models (RF, XGBoost, LightGBM, LSTM, GRU, Ensemble)',
+            'all_predictions.png': 'Comprehensive Predictions Overview - Detailed view of all model predictions on test data',
+            'model_performance_comparison_all.png': 'Model Performance Metrics - Comparison of R², MAE, MSE, and RMSE across all models',
+            'model_comparison.png': 'Model Comparison Chart - Visual comparison of different ML model performances',
+            'prediction_vs_actual.png': 'Prediction vs Actual - How well the ensemble model predicts actual gold prices',
+            'enhanced_time_series_all.png': 'Time Series Analysis - Historical gold price trends with technical indicators',
+            'enhanced_correlation_heatmap.png': 'Enhanced Feature Correlation - Detailed correlation matrix of all features',
+            'correlation_heatmap.png': 'Feature Correlation Heatmap - Shows relationships between features',
+            'feature_importance_enhanced.png': 'Feature Importance - Most influential features for price prediction',
+            'lstm_training_history.png': 'LSTM Training History - Training and validation loss over epochs',
+            'data_overview.png': 'Data Overview - Statistical summary of the dataset',
+            'time_series_analysis.png': 'Time Series Decomposition - Trend, seasonal, and residual components',
+            'DailyClosePrice.png': 'Daily Close Price - Historical daily closing prices'
+        }
+        
+        # List PNG files in visual directory
+        plots = []
+        for file in os.listdir(visual_dir):
+            if file.endswith('.png'):
+                # Get description or create default one
+                description = plot_descriptions.get(file, 
+                    file.replace('_', ' ').replace('.png', '').replace('(1)', '').strip().title())
+                
+                plots.append({
+                    'name': file.replace('_', ' ').replace('.png', '').replace('(1)', '').strip().title(),
+                    'filename': file,
+                    'description': description,
+                    'path': os.path.join(visual_dir, file)
+                })
+        
+        # Sort by filename for consistency
+        plots.sort(key=lambda x: x['filename'])
+        
+        print(f"✅ Found {len(plots)} visualizations in {visual_dir}")
+        
+        return jsonify({
+            'success': True,
+            'plots': plots,
+            'count': len(plots),
+            'message': f'Loaded {len(plots)} visualizations from training experiments'
+        })
         
     except Exception as e:
         print(f"Error listing plots: {e}")
@@ -770,12 +800,20 @@ def available_plots():
 
 @app.route('/api/plot/<filename>')
 def serve_plot(filename):
-    """Serve or generate plot dynamically"""
+    """Serve visualization plots from visual directory"""
     try:
         # Security: prevent directory traversal
         filename = os.path.basename(filename)
         
-        # Generate plot dynamically if it's a special one
+        # Check visual directory
+        visual_dir = os.path.join(WEBAPP_DIR, 'visual')
+        file_path = os.path.join(visual_dir, filename)
+        
+        if os.path.exists(file_path):
+            print(f"✅ Serving plot: {filename}")
+            return send_file(file_path, mimetype='image/png')
+        
+        # If not found, try to generate dynamic plot
         if filename == 'metrics_comparison' and metadata and 'metrics' in metadata:
             # Generate metrics visualization
             fig, ax = plt.subplots(figsize=(10, 6))
@@ -809,13 +847,11 @@ def serve_plot(filename):
                 plt.close()
                 
                 return send_file(img_buffer, mimetype='image/png')
-            else:
-                return jsonify({'error': 'No metrics data available'}), 404
-        else:
-            return jsonify({
-                'error': 'Visualization not available',
-                'message': 'Run the training notebooks to generate detailed visualizations'
-            }), 404
+        
+        return jsonify({
+            'error': 'Visualization not found',
+            'message': f'Plot "{filename}" not available'
+        }), 404
         
     except Exception as e:
         print(f"Error serving plot {filename}: {e}")
