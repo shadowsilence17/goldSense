@@ -30,8 +30,14 @@ app = Flask(__name__,
 # Add request logging middleware
 @app.before_request
 def log_request():
+    global model, scaler_X, scaler_y, feature_names, metadata
+    
     print(f"🌐 {request.method} {request.path} from {request.remote_addr}")
-    print(f"📋 Headers: {dict(request.headers)}")
+    
+    # Auto-load models on first request if not loaded
+    if model is None and not request.path.startswith('/static'):
+        print("📦 Auto-loading models on first request...")
+        load_models()
 
 @app.after_request
 def log_response(response):
@@ -559,27 +565,37 @@ def debug_info():
 def get_metrics():
     """Get model performance metrics"""
     try:
+        # Try to load models if not already loaded
+        if model is None or metadata is None:
+            load_models()
+        
         if metadata is None:
             return jsonify({
                 'success': False,
-                'error': 'No metadata available'
-            }), 404
+                'error': 'Model metadata not available. Models may need to be retrained.',
+                'message': 'Please check if model files include metadata.pkl'
+            }), 200  # Return 200 so frontend can show friendly message
         
         # Extract metrics from metadata
         metrics_data = metadata.get('metrics', {})
+        model_type = metadata.get('model_type', 'Ensemble ML Model')
+        trained_date = metadata.get('trained_date', 'N/A')
+        n_features = metadata.get('n_features', len(feature_names) if feature_names else 0)
         
         return jsonify({
             'success': True,
-            'model_type': metadata.get('model_type', 'Unknown'),
-            'trained_date': metadata.get('trained_date', 'Unknown'),
-            'n_features': metadata.get('n_features', 0),
+            'model_type': model_type,
+            'trained_date': trained_date,
+            'n_features': n_features,
             'metrics': metrics_data
         })
     except Exception as e:
+        print(f"Error loading metrics: {e}")
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'error': str(e)
-        }), 500
+        }), 200
 
 @app.route('/api/plot/comparison')
 def plot_comparison():
