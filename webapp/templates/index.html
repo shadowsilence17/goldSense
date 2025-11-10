@@ -376,19 +376,19 @@
                             html += '<div class="metrics-grid">';
                             html += `<div class="metric-box">
                                 <div class="metric-label">R² Score</div>
-                                <div class="metric-value good">${gru.r2.toFixed(4)}</div>
+                                <div class="metric-value good">${gru.r2.toFixed(2)}</div>
                             </div>`;
                             html += `<div class="metric-box">
                                 <div class="metric-label">MAE</div>
-                                <div class="metric-value">$${gru.mae.toFixed(2)}</div>
+                                <div class="metric-value">$${gru.mae.toFixed(0)}</div>
                             </div>`;
                             html += `<div class="metric-box">
                                 <div class="metric-label">RMSE</div>
-                                <div class="metric-value">$${gru.rmse.toFixed(2)}</div>
+                                <div class="metric-value">$${gru.rmse.toFixed(0)}</div>
                             </div>`;
                             html += `<div class="metric-box">
                                 <div class="metric-label">MAPE</div>
-                                <div class="metric-value">${gru.mape.toFixed(2)}%</div>
+                                <div class="metric-value">${gru.mape.toFixed(1)}%</div>
                             </div>`;
                             html += '</div>';
                         }
@@ -399,18 +399,20 @@
                             html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">';
                             html += '<thead><tr style="background: #667eea; color: white;"><th style="padding: 15px; text-align: left;">Model</th><th style="padding: 15px;">R² Score</th><th style="padding: 15px;">MAE ($)</th><th style="padding: 15px;">RMSE ($)</th><th style="padding: 15px;">MAPE (%)</th></tr></thead><tbody>';
                             
-                            const modelOrder = ['gru', 'lstm', 'ensemble', 'xgboost', 'lightgbm', 'random_forest'];
+                            const modelOrder = ['gru', 'lstm', 'lightgbm', 'xgboost', 'random_forest'];
                             modelOrder.forEach((modelName, idx) => {
                                 if (data.metrics[modelName]) {
                                     const m = data.metrics[modelName];
                                     const rowStyle = idx % 2 === 0 ? 'background: #f8f9fa;' : 'background: white;';
                                     const isBest = modelName === 'gru' ? ' font-weight: bold; color: #27ae60;' : '';
+                                    // Format R² score: show 0.00 for zero values, otherwise show 4 decimals
+                                    const r2Display = m.r2 === 0 ? '0.00' : m.r2.toFixed(2);
                                     html += `<tr style="${rowStyle}">
                                         <td style="padding: 12px;${isBest}">${modelName.toUpperCase()}${modelName === 'gru' ? ' 🏆' : ''}</td>
-                                        <td style="padding: 12px; text-align: center;${isBest}">${m.r2.toFixed(4)}</td>
-                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.mae.toFixed(2)}</td>
-                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.rmse.toFixed(2)}</td>
-                                        <td style="padding: 12px; text-align: center;${isBest}">${m.mape.toFixed(2)}%</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">${r2Display}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.mae.toFixed(0)}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.rmse.toFixed(0)}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">${m.mape.toFixed(1)}%</td>
                                     </tr>`;
                                 }
                             });
