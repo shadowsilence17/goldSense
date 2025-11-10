@@ -587,7 +587,8 @@ def get_metrics():
             'model_type': model_type,
             'trained_date': trained_date,
             'n_features': n_features,
-            'metrics': metrics_data
+            'metrics': metrics_data,
+            'top_correlations': metadata.get('top_correlations', {})
         })
     except Exception as e:
         print(f"Error loading metrics: {e}")

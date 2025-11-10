@@ -369,6 +369,77 @@
                         </div>`;
                         html += '</div>';
                         
+                        // Add performance metrics
+                        if (data.metrics && data.metrics.gru) {
+                            const gru = data.metrics.gru;
+                            html += '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">🏆 Best Model Performance (GRU)</h3>';
+                            html += '<div class="metrics-grid">';
+                            html += `<div class="metric-box">
+                                <div class="metric-label">R² Score</div>
+                                <div class="metric-value good">${gru.r2.toFixed(4)}</div>
+                            </div>`;
+                            html += `<div class="metric-box">
+                                <div class="metric-label">MAE</div>
+                                <div class="metric-value">$${gru.mae.toFixed(2)}</div>
+                            </div>`;
+                            html += `<div class="metric-box">
+                                <div class="metric-label">RMSE</div>
+                                <div class="metric-value">$${gru.rmse.toFixed(2)}</div>
+                            </div>`;
+                            html += `<div class="metric-box">
+                                <div class="metric-label">MAPE</div>
+                                <div class="metric-value">${gru.mape.toFixed(2)}%</div>
+                            </div>`;
+                            html += '</div>';
+                        }
+                        
+                        // Add all models comparison
+                        if (data.metrics) {
+                            html += '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">📊 All Models Comparison</h3>';
+                            html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">';
+                            html += '<thead><tr style="background: #667eea; color: white;"><th style="padding: 15px; text-align: left;">Model</th><th style="padding: 15px;">R² Score</th><th style="padding: 15px;">MAE ($)</th><th style="padding: 15px;">RMSE ($)</th><th style="padding: 15px;">MAPE (%)</th></tr></thead><tbody>';
+                            
+                            const modelOrder = ['gru', 'lstm', 'ensemble', 'xgboost', 'lightgbm', 'random_forest'];
+                            modelOrder.forEach((modelName, idx) => {
+                                if (data.metrics[modelName]) {
+                                    const m = data.metrics[modelName];
+                                    const rowStyle = idx % 2 === 0 ? 'background: #f8f9fa;' : 'background: white;';
+                                    const isBest = modelName === 'gru' ? ' font-weight: bold; color: #27ae60;' : '';
+                                    html += `<tr style="${rowStyle}">
+                                        <td style="padding: 12px;${isBest}">${modelName.toUpperCase()}${modelName === 'gru' ? ' 🏆' : ''}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">${m.r2.toFixed(4)}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.mae.toFixed(2)}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.rmse.toFixed(2)}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">${m.mape.toFixed(2)}%</td>
+                                    </tr>`;
+                                }
+                            });
+                            html += '</tbody></table></div>';
+                        }
+                        
+                        // Add top correlations
+                        if (data.top_correlations) {
+                            html += '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">🔗 Top Feature Correlations with Gold Price</h3>';
+                            html += '<div style="background: white; padding: 20px; border-radius: 10px;">';
+                            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">';
+                            
+                            Object.entries(data.top_correlations).forEach(([feature, corr]) => {
+                                const absCorr = Math.abs(corr);
+                                const color = corr > 0 ? '#27ae60' : '#e74c3c';
+                                const width = (absCorr * 100).toFixed(1);
+                                html += `<div style="padding: 10px; border-left: 4px solid ${color}; background: #f8f9fa;">
+                                    <div style="font-weight: 600; color: #2c3e50; margin-bottom: 5px;">${feature}</div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="flex: 1; background: #ecf0f1; height: 20px; border-radius: 10px; overflow: hidden;">
+                                            <div style="width: ${width}%; height: 100%; background: ${color}; transition: width 0.5s;"></div>
+                                        </div>
+                                        <span style="font-weight: bold; color: ${color}; min-width: 60px;">${corr.toFixed(4)}</span>
+                                    </div>
+                                </div>`;
+                            });
+                            html += '</div></div>';
+                        }
+                        
                         document.getElementById('metrics-content').innerHTML = html;
                     } else {
                         document.getElementById('metrics-loading').innerHTML = 
