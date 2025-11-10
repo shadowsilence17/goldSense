@@ -153,6 +153,138 @@
             color: #7f8c8d;
         }
         .disclaimer { font-size: 0.9em; margin-top: 10px; }
+        
+        /* Mobile Responsive Styles */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .subtitle {
+                font-size: 1em;
+            }
+            /* Mobile-friendly tabs */
+            .tabs {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 20px;
+                border-bottom: none;
+            }
+            .tab {
+                width: 100%;
+                padding: 12px 15px;
+                font-size: 15px;
+                border-radius: 10px;
+                text-align: left;
+            }
+            .tab.active {
+                border-left: 4px solid #764ba2;
+            }
+            /* Adjust cards */
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            h2 {
+                font-size: 1.4em;
+                margin-bottom: 15px;
+            }
+            /* Price display */
+            .price-display {
+                font-size: 2em;
+                padding: 15px;
+            }
+            /* Button groups */
+            .button-group {
+                flex-direction: column;
+            }
+            .btn {
+                min-width: 100%;
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+            /* Metrics grid */
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .metric-box {
+                padding: 15px;
+            }
+            .metric-value {
+                font-size: 1.5em;
+            }
+            /* Plots gallery */
+            .plots-gallery {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            /* Tables - make them scrollable */
+            table {
+                font-size: 0.85em;
+            }
+            table th, table td {
+                padding: 8px !important;
+            }
+            /* Team names - stack on mobile */
+            header p {
+                font-size: 0.85em !important;
+                line-height: 1.4;
+            }
+        }
+        
+        /* Small mobile devices */
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            .subtitle {
+                font-size: 0.9em;
+            }
+            .tab {
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+            .price-display {
+                font-size: 1.6em;
+            }
+            .metric-value {
+                font-size: 1.3em;
+            }
+            h2 {
+                font-size: 1.2em;
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+        
+        /* Tablet landscape */
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 30px;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab {
+                flex: 1 1 auto;
+                min-width: 150px;
+            }
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .plots-gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
