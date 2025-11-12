@@ -1,626 +1,833 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GoldSense - AI-Powered Gold Price Prediction</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #3e4a81 0%, #433a4b 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+      header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #667eea;
+      }
+      h1 {
+        color: #b8b83f;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: #7f8c8d;
+        font-size: 1.2em;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #ecf0f1;
+      }
+      .tab {
+        padding: 15px 30px;
+        background: #ecf0f1;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 10px 10px 0 0;
+        transition: all 0.3s;
+      }
+      .tab:hover {
+        background: #bdc3c7;
+      }
+      .tab.active {
+        background: #36447e;
+        color: white;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      .card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.8em;
+      }
+      .button-group {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        flex: 1;
+        min-width: 150px;
+        padding: 15px 25px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: white;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #363d5d 0%, #764ba2 100%);
+      }
+      .btn-secondary {
+        background: linear-gradient(135deg, #75337c 0%, #f5576c 100%);
+      }
+      .btn-tertiary {
+        background: linear-gradient(135deg, #0c4270 0%, #00f2fe 100%);
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+      .price-display {
+        font-size: 3em;
+        font-weight: bold;
+        color: #f39c12;
+        text-align: center;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+      }
+      .metric-box {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .metric-label {
+        font-size: 0.9em;
+        color: #7f8c8d;
+        margin-bottom: 10px;
+      }
+      .metric-value {
+        font-size: 2em;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .metric-value.good {
+        color: #27ae60;
+      }
+      .metric-value.warning {
+        color: #f39c12;
+      }
+      .plot-container {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .plot-container img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #7f8c8d;
+      }
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+      }
+      .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+      }
+      .plots-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+      }
+      .plot-item {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: transform 0.3s;
+      }
+      .plot-item:hover {
+        transform: scale(1.05);
+      }
+      .plot-item img {
+        width: 100%;
+        height: auto;
+      }
+      .plot-title {
+        padding: 15px;
+        font-weight: 600;
+        color: #2c3e50;
+        text-align: center;
+      }
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #ecf0f1;
+        color: #7f8c8d;
+      }
+      .disclaimer {
+        font-size: 0.9em;
+        margin-top: 10px;
+      }
+
+      /* Mobile Responsive Styles */
+      @media screen and (max-width: 768px) {
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+          padding: 10px;
         }
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+          padding: 20px;
+          border-radius: 15px;
         }
         h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+          font-size: 1.8em;
         }
-        .subtitle { color: #7f8c8d; font-size: 1.2em; }
+        .subtitle {
+          font-size: 1em;
+        }
+        /* Mobile-friendly tabs */
         .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #ecf0f1;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-bottom: 20px;
+          border-bottom: none;
         }
         .tab {
-            padding: 15px 30px;
-            background: #ecf0f1;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 10px 10px 0 0;
-            transition: all 0.3s;
+          width: 100%;
+          padding: 12px 15px;
+          font-size: 15px;
+          border-radius: 10px;
+          text-align: left;
         }
-        .tab:hover { background: #bdc3c7; }
-        .tab.active { background: #667eea; color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab.active {
+          border-left: 4px solid #764ba2;
+        }
+        /* Adjust cards */
         .card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          padding: 15px;
+          margin-bottom: 15px;
         }
-        h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.8em; }
-        .button-group { display: flex; gap: 15px; flex-wrap: wrap; }
-        .btn {
-            flex: 1;
-            min-width: 150px;
-            padding: 15px 25px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: white;
+        h2 {
+          font-size: 1.4em;
+          margin-bottom: 15px;
         }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .btn-secondary { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .btn-tertiary { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        /* Price display */
         .price-display {
-            font-size: 3em;
-            font-weight: bold;
-            color: #f39c12;
-            text-align: center;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            margin: 20px 0;
+          font-size: 2em;
+          padding: 15px;
         }
+        /* Button groups */
+        .button-group {
+          flex-direction: column;
+        }
+        .btn {
+          min-width: 100%;
+          padding: 12px 20px;
+          font-size: 15px;
+        }
+        /* Metrics grid */
         .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
+          grid-template-columns: 1fr;
+          gap: 15px;
         }
         .metric-box {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          padding: 15px;
         }
-        .metric-label { font-size: 0.9em; color: #7f8c8d; margin-bottom: 10px; }
-        .metric-value { font-size: 2em; font-weight: bold; color: #2c3e50; }
-        .metric-value.good { color: #27ae60; }
-        .metric-value.warning { color: #f39c12; }
-        .plot-container { text-align: center; margin: 20px 0; }
-        .plot-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        .metric-value {
+          font-size: 1.5em;
         }
-        .loading { text-align: center; padding: 40px; color: #7f8c8d; }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .alert { padding: 15px 20px; border-radius: 10px; margin: 20px 0; }
-        .alert-success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
-        .alert-error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        /* Plots gallery */
         .plots-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
+          grid-template-columns: 1fr;
+          gap: 15px;
         }
-        .plot-item {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: transform 0.3s;
+        /* Tables - make them scrollable */
+        table {
+          font-size: 0.85em;
         }
-        .plot-item:hover { transform: scale(1.05); }
-        .plot-item img { width: 100%; height: auto; }
-        .plot-title { padding: 15px; font-weight: 600; color: #2c3e50; text-align: center; }
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #ecf0f1;
-            color: #7f8c8d;
+        table th,
+        table td {
+          padding: 8px !important;
         }
-        .disclaimer { font-size: 0.9em; margin-top: 10px; }
-        
-        /* Mobile Responsive Styles */
-        @media screen and (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                padding: 20px;
-                border-radius: 15px;
-            }
-            h1 {
-                font-size: 1.8em;
-            }
-            .subtitle {
-                font-size: 1em;
-            }
-            /* Mobile-friendly tabs */
-            .tabs {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                margin-bottom: 20px;
-                border-bottom: none;
-            }
-            .tab {
-                width: 100%;
-                padding: 12px 15px;
-                font-size: 15px;
-                border-radius: 10px;
-                text-align: left;
-            }
-            .tab.active {
-                border-left: 4px solid #764ba2;
-            }
-            /* Adjust cards */
-            .card {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-            h2 {
-                font-size: 1.4em;
-                margin-bottom: 15px;
-            }
-            /* Price display */
-            .price-display {
-                font-size: 2em;
-                padding: 15px;
-            }
-            /* Button groups */
-            .button-group {
-                flex-direction: column;
-            }
-            .btn {
-                min-width: 100%;
-                padding: 12px 20px;
-                font-size: 15px;
-            }
-            /* Metrics grid */
-            .metrics-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            .metric-box {
-                padding: 15px;
-            }
-            .metric-value {
-                font-size: 1.5em;
-            }
-            /* Plots gallery */
-            .plots-gallery {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            /* Tables - make them scrollable */
-            table {
-                font-size: 0.85em;
-            }
-            table th, table td {
-                padding: 8px !important;
-            }
-            /* Team names - stack on mobile */
-            header p {
-                font-size: 0.85em !important;
-                line-height: 1.4;
-            }
+        /* Team names - stack on mobile */
+        header p {
+          font-size: 0.85em !important;
+          line-height: 1.4;
         }
-        
-        /* Small mobile devices */
-        @media screen and (max-width: 480px) {
-            h1 {
-                font-size: 1.5em;
-            }
-            .subtitle {
-                font-size: 0.9em;
-            }
-            .tab {
-                font-size: 14px;
-                padding: 10px 12px;
-            }
-            .price-display {
-                font-size: 1.6em;
-            }
-            .metric-value {
-                font-size: 1.3em;
-            }
-            h2 {
-                font-size: 1.2em;
-            }
-            .container {
-                padding: 15px;
-            }
+      }
+
+      /* Small mobile devices */
+      @media screen and (max-width: 480px) {
+        h1 {
+          font-size: 1.5em;
         }
-        
-        /* Tablet landscape */
-        @media screen and (min-width: 769px) and (max-width: 1024px) {
-            .container {
-                padding: 30px;
-            }
-            .tabs {
-                flex-wrap: wrap;
-            }
-            .tab {
-                flex: 1 1 auto;
-                min-width: 150px;
-            }
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .plots-gallery {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .subtitle {
+          font-size: 0.9em;
         }
+        .tab {
+          font-size: 14px;
+          padding: 10px 12px;
+        }
+        .price-display {
+          font-size: 1.6em;
+        }
+        .metric-value {
+          font-size: 1.3em;
+        }
+        h2 {
+          font-size: 1.2em;
+        }
+        .container {
+          padding: 15px;
+        }
+      }
+
+      /* Tablet landscape */
+      @media screen and (min-width: 769px) and (max-width: 1024px) {
+        .container {
+          padding: 30px;
+        }
+        .tabs {
+          flex-wrap: wrap;
+        }
+        .tab {
+          flex: 1 1 auto;
+          min-width: 150px;
+        }
+        .metrics-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .plots-gallery {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <header>
-            <h1>🏆 GoldSense</h1>
-            <p class="subtitle">AI-Powered Gold Price Prediction by Team E=mc²</p>
-            <p style="color: #95a5a6; font-size: 0.95em; margin-top: 8px;">
-                Htut Ko Ko • Kaung Hein Htet • Rahul Shakya • Aashutosh Raut • Hein Min Htet
-            </p>
-        </header>
+      <header>
+        <h1>GoldSense AI</h1>
+        <p class="subtitle">AI-Powered Gold Price Prediction by Team E=mc²</p>
+        <p style="color: #95a5a6; font-size: 0.95em; margin-top: 8px">
+          Htut Ko Ko • Kaung Hein Htet • Rahul Shakya • Aashutosh Raut • Hein
+          Min Htet
+        </p>
+      </header>
 
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('predictions')">📊 Predictions</button>
-            <button class="tab" onclick="showTab('performance')">📈 Model Performance</button>
-            <button class="tab" onclick="showTab('visualizations')">🖼️ Visualizations</button>
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('predictions')">
+          Predictions
+        </button>
+        <button class="tab" onclick="showTab('performance')">
+          Model Performance
+        </button>
+        <button class="tab" onclick="showTab('visualizations')">
+          Visualizations
+        </button>
+      </div>
+
+      <div id="predictions-tab" class="tab-content active">
+        <div class="card">
+          <h2>Current Gold Price</h2>
+          <div id="current-price" class="price-display" style="color: #95a5a6">
+            Click predict buttons below to get real-time price
+          </div>
+          <div
+            id="price-unit"
+            style="
+              text-align: center;
+              color: #7f8c8d;
+              font-size: 1.1em;
+              font-weight: 500;
+              margin-top: -10px;
+              display: none;
+            "
+          >
+            per troy ounce (USD)
+          </div>
+          <div
+            id="last-updated"
+            style="text-align: center; color: #7f8c8d; display: none"
+          >
+            Last updated: --
+          </div>
         </div>
 
-        <div id="predictions-tab" class="tab-content active">
-            <div class="card">
-                <h2>Current Gold Price</h2>
-                <div id="current-price" class="price-display" style="color: #95a5a6;">Click predict buttons below to get real-time price</div>
-                <div id="price-unit" style="text-align: center; color: #7f8c8d; font-size: 1.1em; font-weight: 500; margin-top: -10px; display: none;">per troy ounce (USD)</div>
-                <div id="last-updated" style="text-align: center; color: #7f8c8d; display: none;">Last updated: --</div>
-            </div>
-
-            <div class="card">
-                <h2>Get Prediction</h2>
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="getPrediction('day')">📅 Next Day</button>
-                    <button class="btn btn-secondary" onclick="getPrediction('week')">📊 Next Week</button>
-                    <button class="btn btn-tertiary" onclick="getPrediction('month')">📈 Next Month</button>
-                </div>
-            </div>
-
-            <div id="prediction-results" style="display: none;">
-                <div class="card">
-                    <h2 id="result-title">Prediction Results</h2>
-                    <div id="result-content"></div>
-                </div>
-            </div>
-
-            <div id="error-message" class="alert alert-error" style="display: none;">
-                <span id="error-text"></span>
-            </div>
+        <div class="card">
+          <h2>Get Prediction</h2>
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="getPrediction('day')">
+              Next Day
+            </button>
+            <button class="btn btn-secondary" onclick="getPrediction('week')">
+              Next Week
+            </button>
+            <button class="btn btn-tertiary" onclick="getPrediction('month')">
+              Next Month
+            </button>
+          </div>
         </div>
 
-        <div id="performance-tab" class="tab-content">
-            <div class="card">
-                <h2>Model Performance Metrics</h2>
-                <div id="metrics-loading" class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading model metrics...</p>
-                </div>
-                <div id="metrics-content" style="display: none;"></div>
-            </div>
-
-            <div class="card">
-                <h2>Detailed Metrics Table</h2>
-                <div id="metrics-table" class="plot-container">
-                    <div class="loading"><div class="spinner"></div><p>Loading metrics table...</p></div>
-                </div>
-            </div>
+        <div id="prediction-results" style="display: none">
+          <div class="card">
+            <h2 id="result-title">Prediction Results</h2>
+            <div id="result-content"></div>
+          </div>
         </div>
 
-        <div id="visualizations-tab" class="tab-content">
-            <div class="card">
-                <h2>Training Results Visualizations</h2>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">
-                    Comprehensive visualizations from our model training experiments, showcasing performance comparisons 
-                    across different ML models (Random Forest, XGBoost, LightGBM, LSTM, GRU) and their ensemble predictions.
-                </p>
-                <div id="plots-gallery" class="plots-gallery">
-                    <div class="loading"><div class="spinner"></div><p>Loading visualizations...</p></div>
-                </div>
-            </div>
+        <div id="error-message" class="alert alert-error" style="display: none">
+          <span id="error-text"></span>
+        </div>
+      </div>
+
+      <div id="performance-tab" class="tab-content">
+        <div class="card">
+          <h2>Model Performance Metrics</h2>
+          <div id="metrics-loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading model metrics...</p>
+          </div>
+          <div id="metrics-content" style="display: none"></div>
         </div>
 
-        <footer>
-            <p style="font-weight: 600; color: #2c3e50; margin-bottom: 8px;">GoldSense - Team E=mc²</p>
-            <p style="font-size: 0.95em; margin-bottom: 12px;">
-                Htut Ko Ko • Kaung Hein Htet • Rahul Shakya • Aashutosh Raut • Hein Min Htet
-            </p>
-            <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 8px;">
-                Designed & Developed by Htut Ko Ko
-            </p>
-            <p style="font-size: 0.85em; margin-top: 12px;">
-                Powered by ML Models (Random Forest, XGBoost, LightGBM, LSTM, GRU, Ensemble)
-            </p>
-            <p class="disclaimer">⚠️ For educational purposes only. Not financial advice.</p>
-        </footer>
+        <div class="card">
+          <h2>Detailed Metrics Table</h2>
+          <div id="metrics-table" class="plot-container">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading metrics table...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="visualizations-tab" class="tab-content">
+        <div class="card">
+          <h2>Training Results Visualizations</h2>
+          <p style="color: #7f8c8d; margin-bottom: 20px">
+            Comprehensive visualizations from our model training experiments,
+            showcasing performance comparisons across different ML models
+            (Random Forest, XGBoost, LightGBM, LSTM, GRU) and their ensemble
+            predictions.
+          </p>
+          <div id="plots-gallery" class="plots-gallery">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading visualizations...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p style="font-weight: 600; color: #2c3e50; margin-bottom: 8px">
+          GoldSense - Team E=mc²
+        </p>
+        <p style="font-size: 0.95em; margin-bottom: 12px">
+          Htut Ko Ko • Kaung Hein Htet • Rahul Shakya • Aashutosh Raut • Hein
+          Min Htet
+        </p>
+        <p style="font-size: 0.9em; color: #95a5a6; margin-bottom: 8px">
+          Designed & Developed by Htut Ko Ko
+        </p>
+        <p style="font-size: 0.85em; margin-top: 12px">
+          Powered by ML Models (Random Forest, XGBoost, LightGBM, LSTM, GRU,
+          Ensemble)
+        </p>
+        <p class="disclaimer">
+          For educational purposes only. Not financial advice.
+        </p>
+      </footer>
     </div>
 
     <script>
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabName + '-tab').classList.add('active');
-            event.target.classList.add('active');
-            
-            if (tabName === 'performance') loadPerformanceMetrics();
-            else if (tabName === 'visualizations') loadVisualizations();
-        }
+      function showTab(tabName) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((tab) => tab.classList.remove("active"));
+        document
+          .querySelectorAll(".tab")
+          .forEach((btn) => btn.classList.remove("active"));
+        document.getElementById(tabName + "-tab").classList.add("active");
+        event.target.classList.add("active");
 
-        window.onload = function() {
-            // Don't show last updated on load, only after prediction
-        };
+        if (tabName === "performance") loadPerformanceMetrics();
+        else if (tabName === "visualizations") loadVisualizations();
+      }
 
-        function getPrediction(type) {
-            const resultDiv = document.getElementById('prediction-results');
-            const resultTitle = document.getElementById('result-title');
-            const resultContent = document.getElementById('result-content');
-            const errorDiv = document.getElementById('error-message');
-            
-            errorDiv.style.display = 'none';
-            resultDiv.style.display = 'block';
-            resultContent.innerHTML = '<div class="loading"><div class="spinner"></div><p>Analyzing market data...</p></div>';
-            
-            fetch('/api/predict', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ type: type })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Update current price display
-                if (data.current_price) {
-                    document.getElementById('current-price').textContent = '$' + data.current_price.toFixed(2);
-                    document.getElementById('current-price').style.color = '#f39c12';
-                    document.getElementById('price-unit').style.display = 'block';
-                    document.getElementById('last-updated').style.display = 'block';
-                    document.getElementById('last-updated').textContent = 'Last updated: ' + new Date().toLocaleString();
-                }
-                
-                if (data.success) {
-                    if (type === 'day') {
-                        resultTitle.textContent = "Tomorrow's Prediction";
-                        resultContent.innerHTML = `
+      window.onload = function () {
+        // Don't show last updated on load, only after prediction
+      };
+
+      function getPrediction(type) {
+        const resultDiv = document.getElementById("prediction-results");
+        const resultTitle = document.getElementById("result-title");
+        const resultContent = document.getElementById("result-content");
+        const errorDiv = document.getElementById("error-message");
+
+        errorDiv.style.display = "none";
+        resultDiv.style.display = "block";
+        resultContent.innerHTML =
+          '<div class="loading"><div class="spinner"></div><p>Analyzing market data...</p></div>';
+
+        fetch("/api/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: type }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Update current price display
+            if (data.current_price) {
+              document.getElementById("current-price").textContent =
+                "$" + data.current_price.toFixed(2);
+              document.getElementById("current-price").style.color = "#f39c12";
+              document.getElementById("price-unit").style.display = "block";
+              document.getElementById("last-updated").style.display = "block";
+              document.getElementById("last-updated").textContent =
+                "Last updated: " + new Date().toLocaleString();
+            }
+
+            if (data.success) {
+              if (type === "day") {
+                resultTitle.textContent = "Tomorrow's Prediction";
+                resultContent.innerHTML = `
                             <div class="metrics-grid">
                                 <div class="metric-box">
                                     <div class="metric-label">Predicted Price</div>
-                                    <div class="metric-value">$${data.prediction.next_day.toFixed(2)}/oz</div>
+                                    <div class="metric-value">$${data.prediction.next_day.toFixed(
+                                      2
+                                    )}/oz</div>
                                 </div>
                                 <div class="metric-box">
                                     <div class="metric-label">Change</div>
-                                    <div class="metric-value ${data.prediction.change > 0 ? 'good' : 'warning'}">
-                                        ${data.prediction.change > 0 ? '+' : ''}$${data.prediction.change.toFixed(2)}
+                                    <div class="metric-value ${
+                                      data.prediction.change > 0
+                                        ? "good"
+                                        : "warning"
+                                    }">
+                                        ${
+                                          data.prediction.change > 0 ? "+" : ""
+                                        }$${data.prediction.change.toFixed(2)}
                                     </div>
                                 </div>
                                 <div class="metric-box">
                                     <div class="metric-label">Change %</div>
-                                    <div class="metric-value ${data.prediction.change_percent > 0 ? 'good' : 'warning'}">
-                                        ${data.prediction.change_percent > 0 ? '+' : ''}${data.prediction.change_percent.toFixed(2)}%
+                                    <div class="metric-value ${
+                                      data.prediction.change_percent > 0
+                                        ? "good"
+                                        : "warning"
+                                    }">
+                                        ${
+                                          data.prediction.change_percent > 0
+                                            ? "+"
+                                            : ""
+                                        }${data.prediction.change_percent.toFixed(
+                  2
+                )}%
                                     </div>
                                 </div>
                             </div>
                             <div style="text-align: center; color: #7f8c8d; margin-top: 15px; font-size: 0.9em;">
-                                Unit: ${data.unit || 'USD per troy ounce'}
+                                Unit: ${data.unit || "USD per troy ounce"}
                             </div>
                         `;
-                    } else {
-                        resultTitle.textContent = type === 'week' ? "Next Week Forecast" : "Next Month Forecast";
-                        resultContent.innerHTML = `
+              } else {
+                resultTitle.textContent =
+                  type === "week"
+                    ? "Next Week Forecast"
+                    : "Next Month Forecast";
+                resultContent.innerHTML = `
                             <div class="metrics-grid">
                                 <div class="metric-box">
                                     <div class="metric-label">Minimum</div>
-                                    <div class="metric-value">$${data.prediction.min.toFixed(2)}/oz</div>
+                                    <div class="metric-value">$${data.prediction.min.toFixed(
+                                      2
+                                    )}/oz</div>
                                 </div>
                                 <div class="metric-box">
                                     <div class="metric-label">Average</div>
-                                    <div class="metric-value">$${data.prediction.avg.toFixed(2)}/oz</div>
+                                    <div class="metric-value">$${data.prediction.avg.toFixed(
+                                      2
+                                    )}/oz</div>
                                 </div>
                                 <div class="metric-box">
                                     <div class="metric-label">Maximum</div>
-                                    <div class="metric-value">$${data.prediction.max.toFixed(2)}/oz</div>
+                                    <div class="metric-value">$${data.prediction.max.toFixed(
+                                      2
+                                    )}/oz</div>
                                 </div>
                             </div>
                             <div style="text-align: center; color: #7f8c8d; margin-top: 15px; font-size: 0.9em;">
-                                Unit: ${data.unit || 'USD per troy ounce'}
+                                Unit: ${data.unit || "USD per troy ounce"}
                             </div>
                         `;
-                    }
-                } else {
-                    errorDiv.style.display = 'block';
-                    document.getElementById('error-text').textContent = data.error || 'Prediction failed';
-                    resultDiv.style.display = 'none';
-                }
-            })
-            .catch(error => {
-                errorDiv.style.display = 'block';
-                document.getElementById('error-text').textContent = 'Error: ' + error.message;
-                resultDiv.style.display = 'none';
-            });
-        }
+              }
+            } else {
+              errorDiv.style.display = "block";
+              document.getElementById("error-text").textContent =
+                data.error || "Prediction failed";
+              resultDiv.style.display = "none";
+            }
+          })
+          .catch((error) => {
+            errorDiv.style.display = "block";
+            document.getElementById("error-text").textContent =
+              "Error: " + error.message;
+            resultDiv.style.display = "none";
+          });
+      }
 
-        function loadPerformanceMetrics() {
-            // Load basic metrics
-            fetch('/api/metrics')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('metrics-loading').style.display = 'none';
-                        document.getElementById('metrics-content').style.display = 'block';
-                        
-                        let html = '<div class="metrics-grid">';
-                        html += `<div class="metric-box">
+      function loadPerformanceMetrics() {
+        // Load basic metrics
+        fetch("/api/metrics")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              document.getElementById("metrics-loading").style.display = "none";
+              document.getElementById("metrics-content").style.display =
+                "block";
+
+              let html = '<div class="metrics-grid">';
+              html += `<div class="metric-box">
                             <div class="metric-label">Model Type</div>
                             <div class="metric-value" style="font-size: 1.2em;">${data.model_type}</div>
                         </div>`;
-                        html += `<div class="metric-box">
+              html += `<div class="metric-box">
                             <div class="metric-label">Training Date</div>
-                            <div class="metric-value" style="font-size: 1.2em;">${new Date(data.trained_date).toLocaleDateString()}</div>
+                            <div class="metric-value" style="font-size: 1.2em;">${new Date(
+                              data.trained_date
+                            ).toLocaleDateString()}</div>
                         </div>`;
-                        html += `<div class="metric-box">
+              html += `<div class="metric-box">
                             <div class="metric-label">Features Used</div>
                             <div class="metric-value">${data.n_features}</div>
                         </div>`;
-                        html += '</div>';
-                        
-                        // Add performance metrics
-                        if (data.metrics && data.metrics.gru) {
-                            const gru = data.metrics.gru;
-                            html += '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">🏆 Best Model Performance (GRU)</h3>';
-                            html += '<div class="metrics-grid">';
-                            html += `<div class="metric-box">
+              html += "</div>";
+
+              // Add performance metrics
+              if (data.metrics && data.metrics.gru) {
+                const gru = data.metrics.gru;
+                html +=
+                  '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;"> Best Model Performance (GRU)</h3>';
+                html += '<div class="metrics-grid">';
+                html += `<div class="metric-box">
                                 <div class="metric-label">R² Score</div>
-                                <div class="metric-value good">${gru.r2.toFixed(2)}</div>
+                                <div class="metric-value good">${gru.r2.toFixed(
+                                  2
+                                )}</div>
                             </div>`;
-                            html += `<div class="metric-box">
+                html += `<div class="metric-box">
                                 <div class="metric-label">MAE</div>
-                                <div class="metric-value">$${gru.mae.toFixed(0)}</div>
+                                <div class="metric-value">$${gru.mae.toFixed(
+                                  0
+                                )}</div>
                             </div>`;
-                            html += `<div class="metric-box">
+                html += `<div class="metric-box">
                                 <div class="metric-label">RMSE</div>
-                                <div class="metric-value">$${gru.rmse.toFixed(0)}</div>
+                                <div class="metric-value">$${gru.rmse.toFixed(
+                                  0
+                                )}</div>
                             </div>`;
-                            html += `<div class="metric-box">
+                html += `<div class="metric-box">
                                 <div class="metric-label">MAPE</div>
-                                <div class="metric-value">${gru.mape.toFixed(1)}%</div>
+                                <div class="metric-value">${gru.mape.toFixed(
+                                  1
+                                )}%</div>
                             </div>`;
-                            html += '</div>';
-                        }
-                        
-                        // Add all models comparison
-                        if (data.metrics) {
-                            html += '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">📊 All Models Comparison</h3>';
-                            html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">';
-                            html += '<thead><tr style="background: #667eea; color: white;"><th style="padding: 15px; text-align: left;">Model</th><th style="padding: 15px;">R² Score</th><th style="padding: 15px;">MAE ($)</th><th style="padding: 15px;">RMSE ($)</th><th style="padding: 15px;">MAPE (%)</th></tr></thead><tbody>';
-                            
-                            const modelOrder = ['gru', 'lstm', 'lightgbm', 'xgboost', 'random_forest'];
-                            modelOrder.forEach((modelName, idx) => {
-                                if (data.metrics[modelName]) {
-                                    const m = data.metrics[modelName];
-                                    const rowStyle = idx % 2 === 0 ? 'background: #f8f9fa;' : 'background: white;';
-                                    const isBest = modelName === 'gru' ? ' font-weight: bold; color: #27ae60;' : '';
-                                    // Format R² score: show 0.00 for zero values, otherwise show 4 decimals
-                                    const r2Display = m.r2 === 0 ? '0.00' : m.r2.toFixed(2);
-                                    html += `<tr style="${rowStyle}">
-                                        <td style="padding: 12px;${isBest}">${modelName.toUpperCase()}${modelName === 'gru' ? ' 🏆' : ''}</td>
+                html += "</div>";
+              }
+
+              // Add all models comparison
+              if (data.metrics) {
+                html +=
+                  '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">📊 All Models Comparison</h3>';
+                html +=
+                  '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">';
+                html +=
+                  '<thead><tr style="background: #667eea; color: white;"><th style="padding: 15px; text-align: left;">Model</th><th style="padding: 15px;">R² Score</th><th style="padding: 15px;">MAE ($)</th><th style="padding: 15px;">RMSE ($)</th><th style="padding: 15px;">MAPE (%)</th></tr></thead><tbody>';
+
+                const modelOrder = [
+                  "gru",
+                  "lstm",
+                  "lightgbm",
+                  "xgboost",
+                  "random_forest",
+                ];
+                modelOrder.forEach((modelName, idx) => {
+                  if (data.metrics[modelName]) {
+                    const m = data.metrics[modelName];
+                    const rowStyle =
+                      idx % 2 === 0
+                        ? "background: #f8f9fa;"
+                        : "background: white;";
+                    const isBest =
+                      modelName === "gru"
+                        ? " font-weight: bold; color: #27ae60;"
+                        : "";
+                    // Format R² score: show 0.00 for zero values, otherwise show 4 decimals
+                    const r2Display = m.r2 === 0 ? "0.00" : m.r2.toFixed(2);
+                    html += `<tr style="${rowStyle}">
+                                        <td style="padding: 12px;${isBest}">${modelName.toUpperCase()}${
+                      modelName === "gru" ? " " : ""
+                    }</td>
                                         <td style="padding: 12px; text-align: center;${isBest}">${r2Display}</td>
-                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.mae.toFixed(0)}</td>
-                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.rmse.toFixed(0)}</td>
-                                        <td style="padding: 12px; text-align: center;${isBest}">${m.mape.toFixed(1)}%</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.mae.toFixed(
+                      0
+                    )}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">$${m.rmse.toFixed(
+                      0
+                    )}</td>
+                                        <td style="padding: 12px; text-align: center;${isBest}">${m.mape.toFixed(
+                      1
+                    )}%</td>
                                     </tr>`;
-                                }
-                            });
-                            html += '</tbody></table></div>';
-                        }
-                        
-                        // Add top correlations
-                        if (data.top_correlations) {
-                            html += '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">🔗 Top Feature Correlations with Gold Price</h3>';
-                            html += '<div style="background: white; padding: 20px; border-radius: 10px;">';
-                            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">';
-                            
-                            Object.entries(data.top_correlations).forEach(([feature, corr]) => {
-                                const absCorr = Math.abs(corr);
-                                const color = corr > 0 ? '#27ae60' : '#e74c3c';
-                                const width = (absCorr * 100).toFixed(1);
-                                html += `<div style="padding: 10px; border-left: 4px solid ${color}; background: #f8f9fa;">
+                  }
+                });
+                html += "</tbody></table></div>";
+              }
+
+              // Add top correlations
+              if (data.top_correlations) {
+                html +=
+                  '<h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">🔗 Top Feature Correlations with Gold Price</h3>';
+                html +=
+                  '<div style="background: white; padding: 20px; border-radius: 10px;">';
+                html +=
+                  '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">';
+
+                Object.entries(data.top_correlations).forEach(
+                  ([feature, corr]) => {
+                    const absCorr = Math.abs(corr);
+                    const color = corr > 0 ? "#27ae60" : "#e74c3c";
+                    const width = (absCorr * 100).toFixed(1);
+                    html += `<div style="padding: 10px; border-left: 4px solid ${color}; background: #f8f9fa;">
                                     <div style="font-weight: 600; color: #2c3e50; margin-bottom: 5px;">${feature}</div>
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <div style="flex: 1; background: #ecf0f1; height: 20px; border-radius: 10px; overflow: hidden;">
                                             <div style="width: ${width}%; height: 100%; background: ${color}; transition: width 0.5s;"></div>
                                         </div>
-                                        <span style="font-weight: bold; color: ${color}; min-width: 60px;">${corr.toFixed(4)}</span>
+                                        <span style="font-weight: bold; color: ${color}; min-width: 60px;">${corr.toFixed(
+                      4
+                    )}</span>
                                     </div>
                                 </div>`;
-                            });
-                            html += '</div></div>';
-                        }
-                        
-                        document.getElementById('metrics-content').innerHTML = html;
-                    } else {
-                        document.getElementById('metrics-loading').innerHTML = 
-                            '<div class="alert alert-error">No model metrics available. Please train models first.</div>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading metrics:', error);
-                    document.getElementById('metrics-loading').innerHTML = 
-                        '<div class="alert alert-error">Error loading metrics. Ensure models are trained.</div>';
-                });
-            
-            // Load metrics table
-            fetch('/api/plot/metrics_table')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.plot) {
-                        document.getElementById('metrics-table').innerHTML = 
-                            `<img src="data:image/png;base64,${data.plot}" alt="Metrics Table" style="max-width: 100%; height: auto;">`;
-                    } else {
-                        document.getElementById('metrics-table').innerHTML = 
-                            '<div class="alert alert-error">Detailed metrics table not available.</div>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading metrics table:', error);
-                    document.getElementById('metrics-table').innerHTML = 
-                        '<div class="alert alert-error">Error generating metrics table.</div>';
-                });
-        }
+                  }
+                );
+                html += "</div></div>";
+              }
 
-        function loadVisualizations() {
-            fetch('/api/available_plots')
-                .then(response => response.json())
-                .then(data => {
-                    const gallery = document.getElementById('plots-gallery');
-                    
-                    if (data.success && data.plots.length > 0) {
-                        let html = '';
-                        
-                        data.plots.forEach(plot => {
-                            const encodedFilename = encodeURIComponent(plot.filename);
-                            const description = plot.description || plot.name;
-                            html += `
+              document.getElementById("metrics-content").innerHTML = html;
+            } else {
+              document.getElementById("metrics-loading").innerHTML =
+                '<div class="alert alert-error">No model metrics available. Please train models first.</div>';
+            }
+          })
+          .catch((error) => {
+            console.error("Error loading metrics:", error);
+            document.getElementById("metrics-loading").innerHTML =
+              '<div class="alert alert-error">Error loading metrics. Ensure models are trained.</div>';
+          });
+
+        // Load metrics table
+        fetch("/api/plot/metrics_table")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success && data.plot) {
+              document.getElementById(
+                "metrics-table"
+              ).innerHTML = `<img src="data:image/png;base64,${data.plot}" alt="Metrics Table" style="max-width: 100%; height: auto;">`;
+            } else {
+              document.getElementById("metrics-table").innerHTML =
+                '<div class="alert alert-error">Detailed metrics table not available.</div>';
+            }
+          })
+          .catch((error) => {
+            console.error("Error loading metrics table:", error);
+            document.getElementById("metrics-table").innerHTML =
+              '<div class="alert alert-error">Error generating metrics table.</div>';
+          });
+      }
+
+      function loadVisualizations() {
+        fetch("/api/available_plots")
+          .then((response) => response.json())
+          .then((data) => {
+            const gallery = document.getElementById("plots-gallery");
+
+            if (data.success && data.plots.length > 0) {
+              let html = "";
+
+              data.plots.forEach((plot) => {
+                const encodedFilename = encodeURIComponent(plot.filename);
+                const description = plot.description || plot.name;
+                html += `
                                 <div class="plot-item" onclick="window.open('/api/plot/${encodedFilename}', '_blank')" 
                                      title="${description}">
                                     <img src="/api/plot/${encodedFilename}" 
@@ -630,23 +837,27 @@
                                     <div class="plot-title">${plot.name}</div>
                                 </div>
                             `;
-                        });
-                        gallery.innerHTML = html;
-                    } else {
-                        gallery.innerHTML = `
+              });
+              gallery.innerHTML = html;
+            } else {
+              gallery.innerHTML = `
                             <div class="alert alert-error">
                                 <p><strong>No visualizations available.</strong></p>
-                                <p>${data.message || 'Please check the visual directory.'}</p>
+                                <p>${
+                                  data.message ||
+                                  "Please check the visual directory."
+                                }</p>
                             </div>
                         `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading visualizations:', error);
-                    document.getElementById('plots-gallery').innerHTML = 
-                        `<div class="alert alert-error">Error loading visualizations: ${error.message}</div>`;
-                });
-        }
+            }
+          })
+          .catch((error) => {
+            console.error("Error loading visualizations:", error);
+            document.getElementById(
+              "plots-gallery"
+            ).innerHTML = `<div class="alert alert-error">Error loading visualizations: ${error.message}</div>`;
+          });
+      }
     </script>
-</body>
+  </body>
 </html>
